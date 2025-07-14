@@ -46,6 +46,9 @@ const productSchema = new mongooose.Schema({
     warranty:{
         type:String
     },
+    heroImage:{
+        type:String
+    }
 }, { timestamps: true })
 
 module.exports = mongooose.model("product", productSchema);
