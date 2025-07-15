@@ -1,5 +1,6 @@
 const router = require("express").Router();
 const Customer = require("../model/customerModel");
+const mongoose = require("mongoose");
 
 router.post("/register", async (req, res) => {
   try {
