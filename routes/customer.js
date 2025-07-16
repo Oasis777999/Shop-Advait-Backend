@@ -20,7 +20,9 @@ router.post("/register", async (req, res) => {
     res.status(201).json(savedCustomer);
   } catch (error) {
     console.error("Error registering customer:", error);
-    res.status(500).json({ message: "Internal server error", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Internal server error", error: error.message });
   }
 });
 
@@ -29,7 +31,9 @@ router.post("/login", async (req, res) => {
     const { mobile, password } = req.body;
 
     if (!mobile || !password) {
-      return res.status(400).json({ message: "Mobile and password are required" });
+      return res
+        .status(400)
+        .json({ message: "Mobile and password are required" });
     }
 
     // Find customer by mobile and password
@@ -46,15 +50,16 @@ router.post("/login", async (req, res) => {
         id: customer._id,
         name: customer.name,
         email: customer.email,
-        mobile: customer.mobile
-      }
+        mobile: customer.mobile,
+      },
     });
   } catch (error) {
     console.error("Login error:", error);
-    res.status(500).json({ message: "Internal server error", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Internal server error", error: error.message });
   }
 });
-
 
 router.get("/profile/:id", async (req, res) => {
   try {
@@ -97,7 +102,9 @@ router.put("/update/:id", async (req, res) => {
       return res.status(404).json({ message: "Customer not found" });
     }
 
-    res.status(200).json({ message: "Profile updated", customer: updatedCustomer });
+    res
+      .status(200)
+      .json({ message: "Profile updated", customer: updatedCustomer });
   } catch (error) {
     console.error("Error updating profile:", error);
     res.status(500).json({ message: "Failed to update profile" });
@@ -117,7 +124,7 @@ router.post("/cart/:id", async (req, res) => {
 
     // Check if product already exists in cart
     const existingProduct = customer.cart.find(
-      item => item.productId === productId
+      (item) => item.productId === productId
     );
 
     if (existingProduct) {
@@ -129,13 +136,14 @@ router.post("/cart/:id", async (req, res) => {
     }
 
     await customer.save();
-    res.status(200).json({ message: "Product added to cart", cart: customer.cart });
+    res
+      .status(200)
+      .json({ message: "Product added to cart", cart: customer.cart });
   } catch (err) {
     console.error("Cart update failed:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
-
 
 router.get("/cart/:id", async (req, res) => {
   try {
@@ -150,11 +158,35 @@ router.get("/cart/:id", async (req, res) => {
   }
 });
 
+//Control the quantity in the cart
+router.post("/cart/update-quantity/:id", async (req, res) => {
+  const customerId = req.params.id;
+  const { productId, action } = req.body;
 
+  try {
+    const customer = await Customer.findById(customerId);
+    if (!customer) {
+      return res.status(404).json({ message: "Customer not fount" });
+    }
 
+    const item = customer.cart.find((item) => item.productId === productId);
+    if (!item) {
+      return res.status(404).json({ message: "Product not in cart" });
+    }
 
-
-
-
+    if (action === "increase") {
+      item.quantity += 1;
+    } else if (action === "decrease") {
+      item.quantity -= 1;
+      if (item.quantity <= 0) {
+        customer.cart = customer.cart.filter((i) => i.productId !== productId);
+      }
+    }
+    await customer.save();
+    res.status(200).json({ cart: customer.cart });
+  } catch (error) {
+    res.status(500).json({ message: "server error" });
+  }
+});
 
 module.exports = router;
