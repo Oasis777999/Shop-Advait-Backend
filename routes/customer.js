@@ -104,6 +104,54 @@ router.put("/update/:id", async (req, res) => {
   }
 });
 
+// Added the Item in the cart
+router.post("/cart/:id", async (req, res) => {
+  const customerId = req.params.id;
+  const { productId } = req.body;
+
+  try {
+    const customer = await Customer.findById(customerId);
+    if (!customer) {
+      return res.status(404).json({ message: "Customer not found" });
+    }
+
+    // Check if product already exists in cart
+    const existingProduct = customer.cart.find(
+      item => item.productId === productId
+    );
+
+    if (existingProduct) {
+      // If product exists, increment quantity
+      existingProduct.quantity += 1;
+    } else {
+      // If product doesn't exist, add new entry
+      customer.cart.push({ productId, quantity: 1 });
+    }
+
+    await customer.save();
+    res.status(200).json({ message: "Product added to cart", cart: customer.cart });
+  } catch (err) {
+    console.error("Cart update failed:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+
+router.get("/cart/:id", async (req, res) => {
+  try {
+    const customer = await Customer.findById(req.params.id);
+    if (!customer) {
+      return res.status(404).json({ message: "Customer not found" });
+    }
+    res.status(200).json(customer);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server Error" });
+  }
+});
+
+
+
 
 
 

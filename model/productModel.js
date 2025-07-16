@@ -21,10 +21,10 @@ const productSchema = new mongooose.Schema(
       type: Boolean,
     },
     costPrice: {
-      type: String,
+      type: Number,
     },
     sellPrice: {
-      type: String,
+      type: Number,
     },
     sequence: {
       type: String,
@@ -45,7 +45,7 @@ const productSchema = new mongooose.Schema(
       type: String,
     },
     warranty: {
-      type: String,
+      type: Number,
     },
     boxContent: {
       type: [String],

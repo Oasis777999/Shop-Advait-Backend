@@ -20,10 +20,10 @@ const orderSchema = new mongoose.Schema(
       category:String,
       brand:String,
       sku:String,
-      sellPrice:String,
-      costPrice:String,
+      sellPrice:Number,
+      costPrice:Number,
       colour:String,
-      warranty:String
+      warranty:Number
     },
     status: { type: String, default: "Pending" },
     createdAt: { type: Date, default: Date.now },
