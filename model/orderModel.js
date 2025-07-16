@@ -15,7 +15,7 @@ const orderSchema = new mongoose.Schema(
       state: String,
       pincode: Number,
     },
-    product:{
+    product:[{
       name:String,
       category:String,
       brand:String,
@@ -23,7 +23,14 @@ const orderSchema = new mongoose.Schema(
       sellPrice:Number,
       costPrice:Number,
       colour:String,
-      warranty:Number
+      warranty:Number,
+      quantity:Number
+    }],
+    sellTotalPrice:{
+      type:Number
+    },
+    costTotalPrice:{
+      type:Number
     },
     status: { type: String, default: "Pending" },
     createdAt: { type: Date, default: Date.now },
