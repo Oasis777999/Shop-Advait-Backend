@@ -24,6 +24,7 @@ router.get("/list", async (req, res) => {
   }
 });
 
+// Find the product based on the id
 router.get("/:id", async (req, res) => {
   const { id } = req.params;
   try {
@@ -38,8 +39,6 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-
-
 //Update the product
 router.put("/update/:id", async (req, res) => {
   const { id } = req.params;
@@ -50,6 +49,16 @@ router.put("/update/:id", async (req, res) => {
   }
 
   try {
+    const product = await Product.findById(id);
+
+    // Handle heroImage: if provided, append to existing images
+    if (Array.isArray(req.body.heroImage) && req.body.heroImage.length > 0) {
+      req.body.heroImage = [...product.heroImage, ...req.body.heroImage];
+    } else {
+      delete req.body.heroImage; // skip if empty or invalid
+    }
+
+    //Update the product with given data
     const updatedProduct = await Product.findByIdAndUpdate(
       id,
       { $set: req.body },
@@ -68,7 +77,7 @@ router.put("/update/:id", async (req, res) => {
 
 //delete product
 router.delete("/delete/:id", async (req, res) => {
-  const id= req.params.id;
+  const id = req.params.id;
   try {
     const deltedProduct = await Product.findByIdAndDelete(id);
 
@@ -82,6 +91,47 @@ router.delete("/delete/:id", async (req, res) => {
   }
 });
 
+// PATCH route to delete a specific image from heroImage array
+router.patch("/delete-image/:id", async (req, res) => {
+  const { id } = req.params;
+  const { imageToDelete } = req.body;
 
+  // Validate MongoDB ObjectId
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ error: "Invalid product ID" });
+  }
+
+  // Validate input
+  if (!imageToDelete || typeof imageToDelete !== "string") {
+    return res.status(400).json({ error: "Invalid or missing imageToDelete" });
+  }
+
+  try {
+    const product = await Product.findById(id);
+    if (!product) {
+      return res.status(404).json({ error: "Product not found" });
+    }
+
+    // Check if the image exists in heroImage array
+    if (!product.heroImage.includes(imageToDelete)) {
+      return res.status(404).json({ error: "Image not found in product" });
+    }
+
+    // Filter out the image
+    product.heroImage = product.heroImage.filter(
+      (img) => img !== imageToDelete
+    );
+
+    // Save the updated product
+    await product.save();
+
+    res.status(200).json({
+      message: "Image deleted successfully",
+      heroImage: product.heroImage,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 module.exports = router;
