@@ -35,7 +35,7 @@ const orderSchema = new mongoose.Schema(
     status: { type: String, default: "Pending" },
     createdAt: { type: Date, default: Date.now },
   },
-  { timeseries: true }
+  { timestamps: true }
 );
 
 module.exports = mongoose.model("order", orderSchema);
