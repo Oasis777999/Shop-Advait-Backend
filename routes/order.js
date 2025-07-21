@@ -53,4 +53,34 @@ router.put("/update-status/:id", async (req, res) => {
   }
 });
 
+// Get total sellTotalPrice grouped by status
+router.get("/status-sales-summary", async (req, res) => {
+  try {
+    const { month } = req.query;
+
+    const matchStage = month
+      ? {
+          $expr: {
+            $eq: [{ $month: "$createdAt" }, parseInt(month)],
+          },
+        }
+      : {};
+
+    const result = await Order.aggregate([
+      { $match: matchStage },
+      {
+        $group: {
+          _id: "$status",
+          totalSell: { $sum: "$sellTotalPrice" },
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+    
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch summary" });
+  }
+});
+
 module.exports = router;
