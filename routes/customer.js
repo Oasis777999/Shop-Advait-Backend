@@ -189,4 +189,18 @@ router.post("/cart/update-quantity/:id", async (req, res) => {
   }
 });
 
+// Make array Empty
+router.post("/cart/update-quantity/empty/:id", async (req, res) => {
+  const customerId = req.params.id;
+
+  try {
+    const customer = await Customer.findById(customerId);
+    customer.cart = [];
+    await customer.save();
+    res.status(200).json({ cart: customer.cart });
+  } catch (error) {
+    res.status(500).json({ message: "server error" });
+  }
+});
+
 module.exports = router;
